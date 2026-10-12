@@ -12,7 +12,6 @@
  *   5. respeita o botão "parar" e finaliza com status done/erro.
  */
 
-import { getAuthUserId } from "@convex-dev/auth/server";
 import {
   DEFAULT_MODEL,
   MAX_TOKENS_BY_LENGTH,

@@ -18,6 +18,8 @@ export function speechSupported(): boolean {
 export interface SpeakOptions {
   rate?: number;
   voiceName?: string;
+  /** Disparado quando a fala realmente começa (evento onstart). */
+  onStart?: () => void;
   onEnd?: () => void;
   onError?: () => void;
 }
@@ -38,6 +40,7 @@ export function speakText(text: string, opts: SpeakOptions = {}): boolean {
       voices.find((v) => v.lang.toLowerCase().startsWith("pt")) ||
       voices[0];
     if (chosen) utterance.voice = chosen;
+    utterance.onstart = () => opts.onStart?.();
     utterance.onend = () => opts.onEnd?.();
     utterance.onerror = () => opts.onError?.();
     window.speechSynthesis.speak(utterance);

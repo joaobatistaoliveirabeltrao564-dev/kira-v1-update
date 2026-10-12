@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { speakText, stopSpeaking } from "@/hooks/use-voice";
@@ -38,9 +38,14 @@ export function ChatApp() {
   const settingsDoc = useQuery(api.settings.get);
   const aiStatus = useQuery(api.settings.aiStatus);
   const [activeId, setActiveId] = useState<Id<"conversations"> | null>(null);
+  /** false = ainda não há escolha explícita → segue a conversa mais recente. */
+  const [userPicked, setUserPicked] = useState(false);
+  const effectiveActiveId = userPicked
+    ? activeId
+    : (conversations?.[0]?._id ?? null);
   const messages = useQuery(
     api.messages.list,
-    activeId ? { conversationId: activeId } : "skip",
+    effectiveActiveId ? { conversationId: effectiveActiveId } : "skip",
   );
 
   const createConversation = useMutation(api.conversations.create);
@@ -67,8 +72,8 @@ export function ChatApp() {
   const speakingRef = useRef<string | null>(null);
 
   const activeConversation = useMemo(
-    () => conversations?.find((c) => c._id === activeId) ?? null,
-    [conversations, activeId],
+    () => conversations?.find((c) => c._id === effectiveActiveId) ?? null,
+    [conversations, effectiveActiveId],
   );
   const tool = getTool(activeConversation?.tool ?? selectedTool);
   const settings = { ...DEFAULT_SETTINGS, ...(settingsDoc ?? {}) };
@@ -76,14 +81,6 @@ export function ChatApp() {
   const lastMessage = messages?.[messages.length - 1];
   const isStreaming =
     lastMessage?.role === "assistant" && lastMessage.status === "streaming";
-
-  // Seleciona a conversa mais recente automaticamente.
-  useEffect(() => {
-    if (activeId) return;
-    if (conversations && conversations.length > 0) {
-      setActiveId(conversations[0]._id);
-    }
-  }, [conversations, activeId]);
 
   // ── Voz (TTS) ────────────────────────────────────────────────────────
   const handleSpeak = useCallback(
@@ -125,6 +122,8 @@ export function ChatApp() {
   useEffect(() => () => stopSpeaking(), []);
 
   // Fala automaticamente a última resposta, se ativado nas configurações.
+  // O setSpeakingId acontece no callback onstart da utterance (evento do
+  // navegador), nunca sincronamente no corpo do effect.
   const lastAutoSpokenRef = useRef<string | null>(null);
   const lastAutoSpeakConvRef = useRef<Id<"conversations"> | null>(null);
   useEffect(() => {
@@ -134,29 +133,40 @@ export function ChatApp() {
       .find((m) => m.role === "assistant" && m.status === "done" && m.text.trim());
     if (!last || lastAutoSpokenRef.current === last._id) return;
     // Ao trocar de conversa, não lemos mensagens antigas automaticamente.
-    if (lastAutoSpeakConvRef.current !== activeId) {
-      lastAutoSpeakConvRef.current = activeId;
+    if (lastAutoSpeakConvRef.current !== effectiveActiveId) {
+      lastAutoSpeakConvRef.current = effectiveActiveId;
       lastAutoSpokenRef.current = last._id;
       return;
     }
     if (last._id === lastMessage?._id) {
       lastAutoSpokenRef.current = last._id;
-      speakingRef.current = last._id;
-      setSpeakingId(last._id);
       speakText(last.text, {
         rate: settings.ttsRate,
         voiceName: settings.ttsVoice,
+        onStart: () => {
+          speakingRef.current = last._id;
+          setSpeakingId(last._id);
+        },
         onEnd: () => {
+          setSpeakingId(null);
+          speakingRef.current = null;
+        },
+        onError: () => {
           setSpeakingId(null);
           speakingRef.current = null;
         },
       });
     }
-  }, [messages, lastMessage, settings.autoSpeak, settings.ttsRate, settings.ttsVoice]);
+  }, [messages, lastMessage, effectiveActiveId, settings.autoSpeak, settings.ttsRate, settings.ttsVoice]);
 
   // ── Autoprogramação: aplica tags [[script:...]] / [[chat:title|...]] ──
   const processedMessagesRef = useRef<Set<string>>(new Set());
-  const mountedAtRef = useRef(Date.now());
+  // Horário de montagem (definido no efeito abaixo, antes do processamento):
+  // não reaplica edições de mensagens antigas criadas antes do app abrir.
+  const mountedAtRef = useRef(0);
+  useEffect(() => {
+    mountedAtRef.current = Date.now();
+  }, []);
   const applyScriptEdits = useCallback(
     async (edits: ScriptEdit[], conversationId: Id<"conversations">) => {
       let currentScript = settingsDoc?.script ?? "";
@@ -267,10 +277,11 @@ export function ChatApp() {
       if (isStreaming || isSending) return;
       setIsSending(true);
       try {
-        let conversationId = activeId;
+        let conversationId = effectiveActiveId;
         if (!conversationId) {
           conversationId = await createConversation({ tool: tool.id });
           setActiveId(conversationId);
+          setUserPicked(true);
         }
 
         // Comandos locais: resolvem sem gastar créditos de IA.
@@ -328,7 +339,7 @@ export function ChatApp() {
         setIsSending(false);
       }
     },
-    [activeId, createConversation, tool.id, addUserMessage, runLocalCommand, generateUploadUrl, respond, isStreaming, isSending],
+    [effectiveActiveId, createConversation, tool.id, addUserMessage, runLocalCommand, generateUploadUrl, respond, isStreaming, isSending],
   );
 
   const handleStop = useCallback(() => {
@@ -341,15 +352,17 @@ export function ChatApp() {
 
   const handleRetry = useCallback(
     (messageId: Id<"messages">) => {
-      if (!activeId) return;
-      void respond({ conversationId: activeId, retryMessageId: messageId });
+      if (!effectiveActiveId) return;
+      void respond({ conversationId: effectiveActiveId, retryMessageId: messageId });
     },
-    [activeId, respond],
+    [effectiveActiveId, respond],
   );
 
   const handleNewChat = useCallback(() => {
     handleStopSpeak();
     setActiveId(null);
+    // Escolha explícita: fica em branco até a próxima mensagem criar a conversa.
+    setUserPicked(true);
     setSidebarOpen(false);
   }, [handleStopSpeak]);
 
@@ -357,21 +370,25 @@ export function ChatApp() {
     (conversationId: Id<"conversations">) => {
       void removeConversation({ conversationId })
         .then(() => {
-          if (activeId === conversationId) setActiveId(null);
+          if (effectiveActiveId === conversationId) {
+            setActiveId(null);
+            // Volta a seguir a conversa mais recente restante.
+            setUserPicked(false);
+          }
         })
         .catch(() => toast.error("Não consegui apagar a conversa."));
     },
-    [removeConversation, activeId],
+    [removeConversation, effectiveActiveId],
   );
 
   const handleSelectTool = useCallback(
     (toolId: string) => {
       setSelectedTool(toolId);
-      if (activeId) {
-        void setConversationTool({ conversationId: activeId, tool: toolId });
+      if (effectiveActiveId) {
+        void setConversationTool({ conversationId: effectiveActiveId, tool: toolId });
       }
     },
-    [activeId, setConversationTool],
+    [effectiveActiveId, setConversationTool],
   );
 
   const handleSignOut = useCallback(async () => {
@@ -381,12 +398,13 @@ export function ChatApp() {
 
   const sidebarProps = {
     conversations,
-    activeId,
+    activeId: effectiveActiveId,
     activeTool: tool.id,
     theme,
     onSelect: (id: Id<"conversations">) => {
       handleStopSpeak();
       setActiveId(id);
+      setUserPicked(true);
       setSidebarOpen(false);
     },
     onNew: handleNewChat,
@@ -457,7 +475,7 @@ export function ChatApp() {
           </button>
         </header>
 
-        {conversations === undefined || (activeId && messages === undefined) ? (
+        {conversations === undefined || (effectiveActiveId && messages === undefined) ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
@@ -502,6 +520,7 @@ export function ChatApp() {
         onClearHistory={async () => {
           await clearAllConversations();
           setActiveId(null);
+          setUserPicked(false);
         }}
       />
       <Dialog open={lightboxSrc !== null} onOpenChange={(o) => !o && setLightboxSrc(null)}>

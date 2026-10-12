@@ -4,7 +4,6 @@ import {
   compressImage,
   formatBytes,
   isImageFile,
-  isVideoFile,
   validateAttachment,
   type PendingAttachment,
 } from "@/lib/media";

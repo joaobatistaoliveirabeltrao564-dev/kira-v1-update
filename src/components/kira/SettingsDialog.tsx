@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { speechSupported, stopSpeaking, useVoices } from "@/hooks/use-voice";
@@ -65,13 +65,24 @@ export function SettingsDialog({
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const voices = useVoices();
-  const [script, setScript] = useState(settings?.script ?? "");
+  const serverScript = settings?.script ?? "";
+  const [script, setScript] = useState(serverScript);
   const [savingScript, setSavingScript] = useState(false);
   const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
-    if (open) setScript(settings?.script ?? "");
-  }, [open, settings?.script]);
+  // Sincroniza o rascunho com o script do servidor quando o diálogo abre ou
+  // o servidor envia uma nova versão — ajuste durante o render (padrão
+  // "adjusting state when props change"), sem efeito.
+  const [prevServerScript, setPrevServerScript] = useState(serverScript);
+  if (serverScript !== prevServerScript) {
+    setPrevServerScript(serverScript);
+    if (open) setScript(serverScript);
+  }
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) setScript(serverScript);
+  }
 
   const value = <K extends keyof typeof DEFAULT_SETTINGS>(
     key: K,
