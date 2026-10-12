@@ -42,74 +42,74 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* CHANGE VALUES FOR THEME */
+/* CHANGE VALUES FOR THEME — Kira "aurora" (teal/índigo) */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+  --background: oklch(0.975 0.007 220);
+  --foreground: oklch(0.21 0.03 245);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.21 0.03 245);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.21 0.03 245);
+  --primary: oklch(0.58 0.13 195);
+  --primary-foreground: oklch(0.98 0.01 200);
+  --secondary: oklch(0.94 0.015 215);
+  --secondary-foreground: oklch(0.28 0.04 240);
+  --muted: oklch(0.945 0.01 215);
+  --muted-foreground: oklch(0.49 0.03 235);
+  --accent: oklch(0.925 0.025 200);
+  --accent-foreground: oklch(0.3 0.05 220);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: oklch(0.9 0.015 215);
+  --input: oklch(0.9 0.015 215);
+  --ring: oklch(0.58 0.13 195);
+  --chart-1: oklch(0.58 0.13 195);
+  --chart-2: oklch(0.65 0.15 160);
+  --chart-3: oklch(0.5 0.09 250);
+  --chart-4: oklch(0.75 0.15 85);
+  --chart-5: oklch(0.6 0.17 300);
+  --sidebar: oklch(0.985 0.005 220);
+  --sidebar-foreground: oklch(0.21 0.03 245);
+  --sidebar-primary: oklch(0.58 0.13 195);
+  --sidebar-primary-foreground: oklch(0.98 0.01 200);
+  --sidebar-accent: oklch(0.93 0.02 210);
+  --sidebar-accent-foreground: oklch(0.28 0.04 240);
+  --sidebar-border: oklch(0.9 0.015 215);
+  --sidebar-ring: oklch(0.58 0.13 195);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.17 0.028 255);
+  --foreground: oklch(0.96 0.01 220);
+  --card: oklch(0.21 0.03 255);
+  --card-foreground: oklch(0.96 0.01 220);
+  --popover: oklch(0.21 0.03 255);
+  --popover-foreground: oklch(0.96 0.01 220);
+  --primary: oklch(0.76 0.13 183);
+  --primary-foreground: oklch(0.18 0.03 250);
+  --secondary: oklch(0.27 0.03 255);
+  --secondary-foreground: oklch(0.96 0.01 220);
+  --muted: oklch(0.26 0.028 255);
+  --muted-foreground: oklch(0.72 0.02 230);
+  --accent: oklch(0.3 0.04 225);
+  --accent-foreground: oklch(0.97 0.01 200);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.76 0.13 183);
+  --chart-1: oklch(0.76 0.13 183);
+  --chart-2: oklch(0.72 0.14 160);
+  --chart-3: oklch(0.62 0.1 250);
+  --chart-4: oklch(0.8 0.15 85);
+  --chart-5: oklch(0.68 0.16 300);
+  --sidebar: oklch(0.19 0.028 255);
+  --sidebar-foreground: oklch(0.96 0.01 220);
+  --sidebar-primary: oklch(0.76 0.13 183);
+  --sidebar-primary-foreground: oklch(0.18 0.03 250);
+  --sidebar-accent: oklch(0.26 0.03 255);
+  --sidebar-accent-foreground: oklch(0.96 0.01 220);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.76 0.13 183);
 }
 
 @layer base {
@@ -122,5 +122,80 @@
   button:not([disabled]),
   [role="button"]:not([disabled]) {
     cursor: pointer;
+  }
+}
+
+@layer utilities {
+  /* Texto com gradiente da marca Kira */
+  .kira-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      oklch(0.72 0.14 185),
+      oklch(0.66 0.15 230)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Orbes de aurora da landing page */
+  .aurora-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    opacity: 0.5;
+  }
+  .aurora-orb-1 {
+    top: -12rem;
+    left: -8rem;
+    width: 32rem;
+    height: 32rem;
+    background: radial-gradient(
+      circle,
+      oklch(0.75 0.13 185 / 0.55),
+      transparent 65%
+    );
+  }
+  .aurora-orb-2 {
+    top: 4rem;
+    right: -10rem;
+    width: 28rem;
+    height: 28rem;
+    background: radial-gradient(
+      circle,
+      oklch(0.62 0.15 265 / 0.45),
+      transparent 65%
+    );
+  }
+  .aurora-orb-3 {
+    bottom: -14rem;
+    left: 30%;
+    width: 30rem;
+    height: 30rem;
+    background: radial-gradient(
+      circle,
+      oklch(0.72 0.15 150 / 0.35),
+      transparent 65%
+    );
+  }
+
+  /* Scrollbar discreta no chat */
+  .kira-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent)
+      transparent;
+  }
+  .kira-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .kira-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--muted-foreground) 35%, transparent);
+    border-radius: 9999px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-orb {
+    animation: none !important;
   }
 }

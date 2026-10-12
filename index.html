@@ -1,14 +1,39 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kira V1 Update</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#f4f8fb" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#111a2e" media="(prefers-color-scheme: dark)" />
+  <meta
+    name="description"
+    content="Kira — sua assistente amiga com IA de verdade: conversa em português, lê fotos, fala com você e se adapta aos seus comandos."
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Kira — sua assistente amiga</title>
+  <script>
+    // Aplica o tema antes do primeiro paint para evitar "flash" claro/escuro.
+    (function () {
+      try {
+        var stored = localStorage.getItem("kira-theme");
+        var dark = stored
+          ? stored === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (dark) document.documentElement.classList.add("dark");
+      } catch (e) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
 </head>
-
 
 <body>
   <div id="root"></div>

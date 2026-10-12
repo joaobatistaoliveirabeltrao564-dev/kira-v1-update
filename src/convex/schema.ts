@@ -32,12 +32,52 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    // ── Kira: conversas e mensagens do chat ──────────────────────────
+    conversations: defineTable({
+      userId: v.string(),
+      title: v.string(),
+      tool: v.string(), // id da ferramenta/modo ativo (ver src/lib/kira.ts)
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }).index("by_user", ["userId", "updatedAt"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    messages: defineTable({
+      conversationId: v.id("conversations"),
+      userId: v.string(),
+      role: v.union(v.literal("user"), v.literal("assistant")),
+      text: v.string(),
+      attachments: v.optional(
+        v.array(
+          v.object({
+            storageId: v.id("_storage"),
+            kind: v.union(v.literal("image"), v.literal("video")),
+            name: v.string(),
+            mimeType: v.string(),
+          }),
+        ),
+      ),
+      status: v.union(
+        v.literal("streaming"),
+        v.literal("done"),
+        v.literal("error"),
+      ),
+      error: v.optional(v.string()),
+      stopRequested: v.optional(v.boolean()),
+      createdAt: v.number(),
+    }).index("by_conversation", ["conversationId", "createdAt"]),
+
+    // ── Kira: preferências e "script" (regras que o usuário muda por comando) ──
+    settings: defineTable({
+      userId: v.string(),
+      personality: v.string(), // amigavel | profissional | divertida | direta
+      responseLength: v.string(), // curta | media | detalhada
+      ttsRate: v.number(),
+      ttsVoice: v.optional(v.string()),
+      autoSpeak: v.boolean(),
+      script: v.string(), // regras persistentes definidas pelo usuário
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }).index("by_user", ["userId"]),
   },
   {
     schemaValidation: false,
