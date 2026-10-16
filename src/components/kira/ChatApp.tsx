@@ -4,7 +4,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
-import { speakText, stopSpeaking } from "@/hooks/use-voice";
+import { speakText, stopSpeaking, useVoices } from "@/hooks/use-voice";
 import {
   COMMAND_HELP,
   DEFAULT_SETTINGS,
@@ -70,6 +70,8 @@ export function ChatApp() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const speakingRef = useRef<string | null>(null);
+  // Vozes do aparelho (ordenadas com pt primeiro) — usadas pelo comando /voz.
+  const voices = useVoices();
 
   const activeConversation = useMemo(
     () => conversations?.find((c) => c._id === effectiveActiveId) ?? null,
@@ -259,6 +261,69 @@ export function ChatApp() {
           });
           toast.success("Script resetado");
           break;
+        case "listVoices": {
+          if (voices.length === 0) {
+            await localReply({
+              conversationId,
+              text: "Não encontrei vozes de fala neste aparelho. No celular, use o Chrome — ele traz vozes em português.",
+            });
+            break;
+          }
+          const current = settings.ttsVoice;
+          const list = voices
+            .slice(0, 12)
+            .map(
+              (voice, index) =>
+                `${index + 1}. ${voice.name} (${voice.lang})${voice.name === current ? " · atual" : ""}`,
+            )
+            .join("\n");
+          const more =
+            voices.length > 12
+              ? `\n… e mais ${voices.length - 12} vozes — procure por nome com \`/voz <nome>\`.`
+              : "";
+          await localReply({
+            conversationId,
+            text: `Essas são as vozes deste aparelho (português primeiro):\n\n${list}${more}\n\nPara trocar, mande \`/voz 2\` ou \`/voz Google português\`. Trocar a voz é grátis: roda no seu aparelho, sem usar IA.`,
+          });
+          break;
+        }
+        case "setVoice": {
+          const query = command.query.trim();
+          const asNumber = Number.parseInt(query, 10);
+          let chosen: SpeechSynthesisVoice | undefined;
+          if (
+            !Number.isNaN(asNumber) &&
+            String(asNumber) === query &&
+            asNumber >= 1 &&
+            asNumber <= voices.length
+          ) {
+            chosen = voices[asNumber - 1];
+          } else {
+            const needle = query.toLowerCase();
+            chosen =
+              voices.find((v) => v.name.toLowerCase() === needle) ??
+              voices.find((v) => v.name.toLowerCase().includes(needle)) ??
+              voices.find((v) => v.lang.toLowerCase().includes(needle));
+          }
+          if (!chosen) {
+            await localReply({
+              conversationId,
+              text: `Não encontrei nenhuma voz para “${query}”. Digite \`/voz\` para ver a lista completa.`,
+            });
+            break;
+          }
+          await updateSettings({ ttsVoice: chosen.name });
+          await localReply({
+            conversationId,
+            text: `Prontinho! A partir de agora vou falar com a voz ${chosen.name} (${chosen.lang}).`,
+          });
+          // Demonstração com a nova voz — síntese local do navegador, grátis.
+          speakText("Oi! É assim que vou falar com você agora.", {
+            rate: settings.ttsRate,
+            voiceName: chosen.name,
+          });
+          break;
+        }
         default:
           await localReply({
             conversationId,
@@ -267,7 +332,7 @@ export function ChatApp() {
       }
       void rawText;
     },
-    [localReply, settingsDoc?.script, setScript, resetScript],
+    [localReply, settingsDoc?.script, setScript, resetScript, voices, updateSettings, settings.ttsVoice, settings.ttsRate],
   );
 
   // ── Envio de mensagens ───────────────────────────────────────────────

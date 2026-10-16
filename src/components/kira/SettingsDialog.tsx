@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
-import { speechSupported, stopSpeaking, useVoices } from "@/hooks/use-voice";
+import {
+  speakText,
+  speechSupported,
+  stopSpeaking,
+  useVoices,
+} from "@/hooks/use-voice";
 import {
   DEFAULT_SETTINGS,
   PERSONALITIES,
@@ -21,7 +26,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, Moon, RotateCcw, Save, Sun, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Moon,
+  Play,
+  RotateCcw,
+  Save,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PERSONALITY_LABELS: Record<string, string> = {
@@ -199,10 +212,37 @@ export function SettingsDialog({
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label className="text-sm">
-                    Velocidade da fala:{" "}
-                    {(value("ttsRate") as number).toFixed(1)}×
-                  </Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-sm">
+                      Velocidade da fala:{" "}
+                      {(value("ttsRate") as number).toFixed(1)}×
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer gap-1.5"
+                      title="Ouvir um exemplo com a voz escolhida (grátis, sem IA)"
+                      onClick={() => {
+                        stopSpeaking();
+                        const ok = speakText(
+                          "Oi, eu sou a Kira! É assim que vou falar com você.",
+                          {
+                            rate: value("ttsRate") as number,
+                            voiceName: value("ttsVoice") as string | undefined,
+                          },
+                        );
+                        if (!ok) {
+                          toast.error(
+                            "A leitura em voz alta não está disponível neste navegador.",
+                          );
+                        }
+                      }}
+                    >
+                      <Play className="size-3.5" />
+                      Testar voz
+                    </Button>
+                  </div>
                   <Slider
                     value={[value("ttsRate") as number]}
                     min={0.5}
@@ -213,6 +253,13 @@ export function SettingsDialog({
                     }
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Dica: no chat você pode digitar{" "}
+                  <code className="rounded bg-muted px-1 font-mono">/voz</code>{" "}
+                  para listar as vozes e{" "}
+                  <code className="rounded bg-muted px-1 font-mono">/voz 2</code>{" "}
+                  para trocar — tudo pelo celular, sem gastar créditos de IA.
+                </p>
               </>
             )}
           </section>

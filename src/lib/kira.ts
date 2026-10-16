@@ -260,10 +260,18 @@ export type LocalCommand =
   | { kind: "showScript" }
   | { kind: "addRule"; rule: string }
   | { kind: "clearScript" }
+  | { kind: "listVoices" }
+  | { kind: "setVoice"; query: string }
   | { kind: "unknown"; raw: string };
 
 export function parseLocalCommand(input: string): LocalCommand | null {
   const text = input.trim();
+  // Comando avulso `/voz` — listar/trocar a voz falada sem gastar créditos.
+  const voz = text.match(/^\/voz(?:\s+(.*))?$/i);
+  if (voz) {
+    const arg = (voz[1] ?? "").trim();
+    return arg ? { kind: "setVoice", query: arg } : { kind: "listVoices" };
+  }
   if (!text.startsWith("/cmd")) return null;
   const body = text.slice(4).trim();
   const [head, ...rest] = body.split(/\s+/);
@@ -282,6 +290,8 @@ export function parseLocalCommand(input: string): LocalCommand | null {
     case "limpar":
     case "resetar":
       return { kind: "clearScript" };
+    case "voz":
+      return arg ? { kind: "setVoice", query: arg } : { kind: "listVoices" };
     default:
       return { kind: "unknown", raw: body };
   }
@@ -292,6 +302,9 @@ export const COMMAND_HELP = `**Comandos da Kira** (funcionam sem usar créditos 
 - \`/cmd ver\` — mostra o script atual da Kira
 - \`/cmd adicionar <regra>\` — adiciona uma regra permanente ao script
 - \`/cmd limpar\` — apaga todas as regras personalizadas
+- \`/voz\` — lista as vozes do aparelho (a atual marcada com “atual”)
+- \`/voz 2\` — passa a falar com a voz nº 2 da lista
+- \`/voz <nome>\` — troca pela voz cujo nome contém “nome”
 - \`/cmd ajuda\` — mostra esta ajuda
 
 Além disso, você pode dar ordens direto no chat: se você disser algo como *"a partir de agora sempre responda com emojis"*, a Kira aplica a mudança no próprio script e confirma na resposta.`;

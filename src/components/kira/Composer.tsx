@@ -147,9 +147,13 @@ export function Composer({
                     className="size-10 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-lg">
-                    🎬
-                  </div>
+                  <video
+                    src={attachment.previewUrl}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="size-10 rounded-lg bg-muted object-cover"
+                  />
                 )}
                 <div className="max-w-40">
                   <p className="truncate text-xs font-medium">
@@ -210,8 +214,8 @@ export function Composer({
             type="button"
             onClick={() => cameraInputRef.current?.click()}
             disabled={disabled}
-            className="mb-0.5 hidden cursor-pointer rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:block"
-            title="Tirar uma foto com a câmera"
+            className="mb-0.5 cursor-pointer rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            title="Tirar uma foto agora"
           >
             <Camera className="size-5" />
           </button>

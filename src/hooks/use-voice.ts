@@ -61,12 +61,28 @@ export function stopSpeaking() {
   }
 }
 
+/**
+ * Ordena as vozes para exibição: pt-BR primeiro, depois outros pt, depois o
+ * resto — mantendo a ordem original dentro de cada grupo.
+ */
+export function sortVoicesForDisplay(
+  voices: SpeechSynthesisVoice[],
+): SpeechSynthesisVoice[] {
+  const rank = (voice: SpeechSynthesisVoice) => {
+    const lang = voice.lang.toLowerCase();
+    if (lang.replace("_", "-") === "pt-br") return 0;
+    if (lang.startsWith("pt")) return 1;
+    return 2;
+  };
+  return [...voices].sort((a, b) => rank(a) - rank(b));
+}
+
 /** Lista as vozes disponíveis do dispositivo (carrega de forma assíncrona). */
 export function useVoices(): SpeechSynthesisVoice[] {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   useEffect(() => {
     if (!speechSupported()) return;
-    const load = () => setVoices(window.speechSynthesis.getVoices());
+    const load = () => setVoices(sortVoicesForDisplay(window.speechSynthesis.getVoices()));
     load();
     window.speechSynthesis.addEventListener?.("voiceschanged", load);
     return () =>
